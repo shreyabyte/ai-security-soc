@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const severityStyles = {
   info: 'border-blue-400 text-blue-400',
   warning: 'border-yellow-400 text-yellow-400',
@@ -11,7 +13,7 @@ function ActiveAlerts() {
 
   useEffect(() => {
     const fetchAlerts = () => {
-      fetch('http://localhost:8000/alerts')
+      fetch(`${API_URL}/alerts`)
         .then((res) => res.json())
         .then((data) => setAlerts(data))
         .catch((err) => console.error('Failed to fetch alerts:', err))

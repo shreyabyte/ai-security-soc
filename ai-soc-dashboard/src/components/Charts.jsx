@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const severityColors = {
   info: '#60a5fa',
   warning: '#facc15',
@@ -23,7 +25,7 @@ function Charts() {
 
   useEffect(() => {
     const fetchLogs = () => {
-      fetch('http://localhost:8000/logs')
+      fetch(`${API_URL}/logs`)
         .then((res) => res.json())
         .then((data) => setLogs(data))
         .catch((err) => console.error('Failed to fetch logs:', err))

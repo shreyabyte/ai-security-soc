@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const statusStyles = {
   online: 'bg-green-500',
   warning: 'bg-yellow-500',
@@ -11,7 +13,7 @@ function ServerHealth() {
 
   useEffect(() => {
     const fetchServers = () => {
-      fetch('http://localhost:8000/servers')
+      fetch(`${API_URL}/servers`)
         .then((res) => res.json())
         .then((data) => setServers(data))
         .catch((err) => console.error('Failed to fetch servers:', err))

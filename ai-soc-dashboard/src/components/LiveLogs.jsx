@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const severityColors = {
   info: 'text-blue-400',
   warning: 'text-yellow-400',
@@ -11,7 +13,7 @@ function LiveLogs() {
 
   useEffect(() => {
   const fetchLogs = () => {
-    fetch('http://localhost:8000/logs')
+    fetch(`${API_URL}/logs`)
       .then((res) => res.json())
       .then((data) => setLogs(data))
       .catch((err) => console.error('Failed to fetch logs:', err))
