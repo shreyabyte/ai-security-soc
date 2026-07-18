@@ -2,4 +2,3 @@ fastapi
 uvicorn
 sqlalchemy
 pydantic
-requests

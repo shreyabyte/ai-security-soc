@@ -6,6 +6,7 @@ from typing import List
 import models
 import schemas
 import detection
+import log_generator
 from database import engine, SessionLocal
 
 # Create database tables
@@ -13,6 +14,16 @@ models.Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(title="AI SOC Backend")
+
+
+@app.on_event("startup")
+def start_log_generator():
+    log_generator.start_background_generator()
+
+
+@app.on_event("shutdown")
+def stop_log_generator():
+    log_generator.stop_background_generator()
 
 # Enable CORS
 app.add_middleware(

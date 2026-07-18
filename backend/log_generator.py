@@ -1,8 +1,11 @@
 import random
+import threading
 import time
-import requests
+from typing import Optional
 
-API_URL = "https://ai-soc-backend-lte9.onrender.com/logs"
+from database import SessionLocal
+import detection
+import models
 
 SERVERS = ["server-1", "server-2", "server-3"]
 
@@ -15,6 +18,10 @@ EVENT_TYPES = [
 
 USERS = ["alice", "bob", "admin", "root", "guest"]
 IPS = ["192.168.1.10", "203.0.113.5", "10.0.0.4", "172.16.0.9"]
+
+_generator_thread: Optional[threading.Thread] = None
+_generator_started = False
+_stop_event = threading.Event()
 
 
 def generate_log():
@@ -43,17 +50,60 @@ def generate_log():
     }
 
 
+def _insert_generated_log():
+    db = SessionLocal()
+    try:
+        log_payload = generate_log()
+        db_log = models.Log(**log_payload)
+        db.add(db_log)
+        db.commit()
+        db.refresh(db_log)
+
+        detection.run_detection(db, db_log)
+    finally:
+        db.close()
+
+
 def run():
-    print("Log generator started. Sending logs every 3 seconds. Press Ctrl+C to stop.")
-    while True:
-        log = generate_log()
+    print("Log generator started. Inserting logs every 3 seconds.")
+    while not _stop_event.is_set():
         try:
-            response = requests.post(API_URL, json=log)
-            print(f"Sent: {log} -> Status {response.status_code}")
-        except requests.exceptions.ConnectionError:
-            print("Backend not reachable. Is uvicorn running?")
-        time.sleep(3)
+            _insert_generated_log()
+            print("Generated log")
+        except Exception as exc:
+            print(f"Log generation failed: {exc}")
+
+        if _stop_event.wait(3):
+            break
+
+
+def start_background_generator():
+    global _generator_thread, _generator_started
+
+    if _generator_started:
+        return _generator_thread
+
+    _generator_started = True
+    _stop_event.clear()
+    _generator_thread = threading.Thread(target=run, name="log-generator", daemon=True)
+    _generator_thread.start()
+    return _generator_thread
+
+
+def stop_background_generator():
+    global _generator_started
+
+    _stop_event.set()
+    if _generator_thread and _generator_thread.is_alive():
+        _generator_thread.join(timeout=1)
+    _generator_started = False
+    return _generator_thread
 
 
 if __name__ == "__main__":
-    run()
+    start_background_generator()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        stop_background_generator()
