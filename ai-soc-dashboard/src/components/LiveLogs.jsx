@@ -1,4 +1,4 @@
-import { mockLogs } from '../mockData'
+import { useState, useEffect } from 'react'
 
 const severityColors = {
   info: 'text-blue-400',
@@ -7,9 +7,28 @@ const severityColors = {
 }
 
 function LiveLogs() {
+  const [logs, setLogs] = useState([])
+
+  useEffect(() => {
+  const fetchLogs = () => {
+    fetch('http://localhost:8000/logs')
+      .then((res) => res.json())
+      .then((data) => setLogs(data))
+      .catch((err) => console.error('Failed to fetch logs:', err))
+  }
+
+  fetchLogs()
+  const interval = setInterval(fetchLogs, 3000)
+
+  return () => clearInterval(interval)
+}, [])
+
   return (
     <div className="space-y-2">
-      {mockLogs.map((log) => (
+      {logs.length === 0 && (
+        <p className="text-slate-400">No logs yet. Send one via /docs to see it here.</p>
+      )}
+      {logs.map((log) => (
         <div
           key={log.id}
           className="bg-slate-900 rounded-lg p-3 text-sm flex justify-between items-start"
