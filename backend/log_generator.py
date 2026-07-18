@@ -2,7 +2,7 @@ import random
 import time
 import requests
 
-API_URL = "http://localhost:8000/logs"
+API_URL = "https://ai-soc-backend-lte9.onrender.com/logs"
 
 SERVERS = ["server-1", "server-2", "server-3"]
 
