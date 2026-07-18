@@ -11,3 +11,12 @@ class Log(Base):
     details = Column(String)
     severity = Column(String, default="info")
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+class Alert(Base):
+    __tablename__ = "alerts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    rule_triggered = Column(String)
+    server_id = Column(String, index=True)
+    severity = Column(String, default="warning")
+    timestamp = Column(DateTime, default=datetime.utcnow)

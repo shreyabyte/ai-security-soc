@@ -1,4 +1,4 @@
-import { mockServers } from '../mockData'
+import { useState, useEffect } from 'react'
 
 const statusStyles = {
   online: 'bg-green-500',
@@ -7,9 +7,28 @@ const statusStyles = {
 }
 
 function ServerHealth() {
+  const [servers, setServers] = useState([])
+
+  useEffect(() => {
+    const fetchServers = () => {
+      fetch('http://localhost:8000/servers')
+        .then((res) => res.json())
+        .then((data) => setServers(data))
+        .catch((err) => console.error('Failed to fetch servers:', err))
+    }
+
+    fetchServers()
+    const interval = setInterval(fetchServers, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      {mockServers.map((server) => (
+      {servers.length === 0 && (
+        <p className="text-slate-400">No server data yet.</p>
+      )}
+      {servers.map((server) => (
         <div key={server.server_id} className="bg-slate-900 rounded-lg p-3">
           <div className="flex items-center justify-between mb-2">
             <span className="font-semibold">{server.server_id}</span>

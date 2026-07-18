@@ -1,4 +1,4 @@
-import { mockAlerts } from '../mockData'
+import { useState, useEffect } from 'react'
 
 const severityStyles = {
   info: 'border-blue-400 text-blue-400',
@@ -7,9 +7,28 @@ const severityStyles = {
 }
 
 function ActiveAlerts() {
+  const [alerts, setAlerts] = useState([])
+
+  useEffect(() => {
+    const fetchAlerts = () => {
+      fetch('http://localhost:8000/alerts')
+        .then((res) => res.json())
+        .then((data) => setAlerts(data))
+        .catch((err) => console.error('Failed to fetch alerts:', err))
+    }
+
+    fetchAlerts()
+    const interval = setInterval(fetchAlerts, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div className="space-y-2">
-      {mockAlerts.map((alert) => (
+      {alerts.length === 0 && (
+        <p className="text-slate-400">No alerts yet.</p>
+      )}
+      {alerts.map((alert) => (
         <div
           key={alert.id}
           className={`bg-slate-900 rounded-lg p-3 text-sm border-l-4 ${severityStyles[alert.severity]}`}

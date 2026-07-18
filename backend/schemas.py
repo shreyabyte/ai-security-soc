@@ -13,3 +13,13 @@ class LogOut(LogCreate):
 
     class Config:
         from_attributes = True
+
+class AlertOut(BaseModel):
+    id: int
+    rule_triggered: str
+    server_id: str
+    severity: str
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
