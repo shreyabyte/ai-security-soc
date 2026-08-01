@@ -1,8 +1,5 @@
 # AI SOC Dashboard
 
-## Project Title
-AI SOC Dashboard
-
 ## Problem Statement
 Modern organizations generate large volumes of security logs and system events every minute, but monitoring them manually is slow, error-prone, and often leads to missed alerts. Security teams need a centralized and intelligent way to identify suspicious activity, monitor server health, and respond quickly to potential threats.
 
