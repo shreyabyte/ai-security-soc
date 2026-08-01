@@ -1,31 +1,44 @@
-# AI SOC Dashboard — Merged Project
+# AI SOC Dashboard
 
-Your frontend (rich UI) + your friend's backend (FastAPI + SQLite), wired together.
+## Project Title
+AI SOC Dashboard
 
-## What changed
+## Problem Statement
+Modern organizations generate large volumes of security logs and system events every minute, but monitoring them manually is slow, error-prone, and often leads to missed alerts. Security teams need a centralized and intelligent way to identify suspicious activity, monitor server health, and respond quickly to potential threats.
 
-- **Backend**: untouched — still the FastAPI app your friend built (`/logs`, `/alerts`, `/servers`), including the background log generator that simulates live traffic every 3s.
-- **Frontend**: your original UI, but:
-  - `src/services/api.ts` now calls the real backend instead of returning mock arrays.
-  - `src/services/adapters.ts` is new — it maps the backend's simple data shapes into your frontend's richer `Log` / `Alert` / `Server` types, and derives dashboard KPIs/charts from real logs + alerts (since the backend doesn't pre-compute those).
-  - `src/services/websocket.ts` used to fake a WebSocket with random data. It now polls `GET /logs` every 3s for real new events, but keeps the exact same interface so nothing else had to change.
-  - Removed unused Replit-monorepo scaffolding (workspace packages, Postgres/Drizzle db, Orval codegen) that your frontend export included but never actually used — it was 100% mock data end to end.
-  - The **AI Security Analyst is now wired to real data** too — see below.
-- **Backend addition**: `ai_analyst.py` + two new endpoints, `GET /ai/summary` and `POST /ai/ask`. This is rule-based analysis over your real alerts/logs (no LLM, no API key needed) — it replaces the old hardcoded chat responses with answers that actually reflect what's in your database right now.
+## Project Overview
+AI SOC Dashboard is a full-stack security monitoring solution designed to simulate a Security Operations Center (SOC) environment. It collects logs, detects suspicious behavior, and displays real-time alerts and system insights through an interactive dashboard. The project combines a React-based frontend, a FastAPI backend, and a lightweight database to provide a practical and scalable monitoring experience.
 
-## AI Security Analyst
+## Key Features
+- Real-time log visualization for system and security events
+- Live alerting for suspicious activities such as repeated failed logins and high CPU usage
+- Server health monitoring with status indicators
+- Interactive charts for performance and event trends
+- Lightweight architecture suitable for demos, learning, and future expansion
 
-- `GET /ai/summary` — current focus, risk score, and recommended actions, derived from the most severe/recent real alert.
-- `POST /ai/ask {question}` — simple keyword-routed answers (critical threats, blocking IPs, server/CPU status, recent logs) grounded in real DB data.
-- This is **not** an LLM — it's honest rule-based logic, same idea as the old simulated version but backed by real data instead of canned text.
-- To upgrade to a real LLM later: get a Gemini API key at https://aistudio.google.com/apikey, add it to `backend/.env` as `GEMINI_API_KEY`, and swap the body of `ai_analyst.ask()` for a call to the Gemini API (keep the same function signature so nothing else needs to change).
+## Tech Stack
+- Frontend: React, Vite, Tailwind CSS, Recharts
+- Backend: FastAPI, Python
+- Database: SQLite
+- AI / Detection Logic: Rule-based anomaly detection for security events and system health monitoring
+- Other Tools: REST APIs, CORS support, JSON-based data exchange
 
-## Known gaps / honest limitations
+## Team Members and Contributions
+- Member 1 – Frontend Development & Integration
 
-- Backend doesn't track server memory/disk/network — the adapter derives stable placeholder values from CPU so the UI doesn't look broken. Real values would need the backend extended.
-- **Threat Intelligence** page still uses mock data — the backend has no threat-intel feed at all, so there's nothing real to wire it to yet.
-- Backend alert severities are only `critical`/`warning` (no `high`/`low`), so those buckets are always 0 in charts — cosmetic, not a bug.
-- No auth on the backend — fine for a demo/hackathon, not production.
+Designed and developed the AI SOC dashboard UI
+Improved user experience and dashboard layout
+Integrated frontend with backend APIs
+Implemented data visualization and responsive layouts
+
+- Member 2 – Backend Development & Detection Engine
+
+Developed FastAPI backend and REST APIs
+Designed and managed the database schema and API endpoints
+Implemented log generation and threat detection logic
+Built alert generation, server monitoring, and backend testing
+
+## Demo
 
 ## How to run it
 
@@ -47,8 +60,12 @@ This starts the dashboard on `http://localhost:3000`. It reads the backend URL f
 
 Open `http://localhost:3000` — you should see live logs, alerts, and server health updating every few seconds, all coming from the real backend.
 
-## Next steps (optional, if you have more time)
+## Future Scope / Improvements
+- Integrate with real SIEM tools and cloud log sources
+- Add authentication and role-based access control
+- Introduce machine learning-based anomaly detection
+- Add email, SMS, or Slack notifications for critical incidents
+- Expand analytics with advanced threat correlation and reporting
 
-- **AI Analyst → real LLM**: see the "AI Security Analyst" section above — the endpoint is already in place, it just needs a Gemini key swapped in.
-- **Threat Intelligence**: would need a real feed (even a free one like AbuseIPDB) to replace the mock data.
-- **Server metrics**: extend backend `models.py`/`log_generator.py` to actually track memory/disk/network if you want real numbers instead of derived placeholders.
+
+
