@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: #0A0A0A;
+  --color-foreground: #F5F5F5;
+  --color-border: #2F2F2F;
+  --color-input: #2F2F2F;
+  --color-ring: #22C55E;
+
+  --color-card: #1C1C1C;
+  --color-card-foreground: #F5F5F5;
+  --color-card-border: #2F2F2F;
+
+  --color-popover: #232323;
+  --color-popover-foreground: #F5F5F5;
+  --color-popover-border: #2F2F2F;
+
+  --color-primary: #22C55E;
+  --color-primary-foreground: #0A0A0A;
+  --color-primary-border: #22C55E;
+
+  --color-secondary: #232323;
+  --color-secondary-foreground: #F5F5F5;
+  --color-secondary-border: #2F2F2F;
+
+  --color-muted: #232323;
+  --color-muted-foreground: #A1A1AA;
+  --color-muted-border: #2F2F2F;
+
+  --color-accent: #232323;
+  --color-accent-foreground: #F5F5F5;
+  --color-accent-border: #2F2F2F;
+
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-border: #EF4444;
+
+  --color-chart-1: #22C55E;
+  --color-chart-2: #EF4444;
+  --color-chart-3: #F59E0B;
+  --color-chart-4: #A1A1AA;
+  --color-chart-5: #2F2F2F;
+
+  --color-sidebar: #141414;
+  --color-sidebar-foreground: #F5F5F5;
+  --color-sidebar-border: #2F2F2F;
+  --color-sidebar-primary: #22C55E;
+  --color-sidebar-primary-foreground: #0A0A0A;
+  --color-sidebar-accent: #232323;
+  --color-sidebar-accent-foreground: #F5F5F5;
+  --color-sidebar-ring: #22C55E;
+
+  --color-threat-critical: #EF4444;
+  --color-threat-high: #F97316;
+  --color-threat-medium: #F59E0B;
+  --color-threat-low: #A1A1AA;
+  --color-threat-info: #A1A1AA;
+  --color-threat-healthy: #22C55E;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.375rem;
+}
+
+:root, .dark {
+  --background: 0 0% 4%; /* #0A0A0A */
+  --foreground: 0 0% 96%; /* #F5F5F5 */
+  
+  --card: 0 0% 11%; /* #1C1C1C */
+  --card-foreground: 0 0% 96%;
+  --card-border: 0 0% 18%; /* #2F2F2F */
+
+  --popover: 0 0% 14%; /* #232323 */
+  --popover-foreground: 0 0% 96%;
+  --popover-border: 0 0% 18%;
+
+  --primary: 142 71% 45%; /* #22C55E */
+  --primary-foreground: 0 0% 4%;
+
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 0 0% 96%;
+
+  --muted: 0 0% 14%;
+  --muted-foreground: 240 5% 65%; /* #A1A1AA */
+
+  --accent: 0 0% 14%;
+  --accent-foreground: 0 0% 96%;
+
+  --destructive: 0 84% 60%; /* #EF4444 */
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 0 0% 18%; /* #2F2F2F */
+  --input: 0 0% 18%;
+  --ring: 142 71% 45%;
+
+  --chart-1: 142 71% 45%;
+  --chart-2: 0 84% 60%;
+  --chart-3: 38 92% 50%;
+  --chart-4: 240 5% 65%;
+  --chart-5: 0 0% 18%;
+
+  --sidebar: 0 0% 8%; /* #141414 */
+  --sidebar-foreground: 0 0% 96%;
+  --sidebar-border: 0 0% 18%;
+  --sidebar-primary: 142 71% 45%;
+  --sidebar-primary-foreground: 0 0% 4%;
+  --sidebar-accent: 0 0% 14%;
+  --sidebar-accent-foreground: 0 0% 96%;
+  --sidebar-ring: 142 71% 45%;
+
+  --threat-critical: 0 84% 60%;
+  --threat-high: 24 95% 53%;
+  --threat-medium: 38 92% 50%;
+  --threat-low: 240 5% 65%;
+  --threat-info: 240 5% 65%;
+  --threat-healthy: 142 71% 45%;
+
+  --app-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --app-font-mono: 'JetBrains Mono', monospace;
+  --radius: 0.375rem; 
+
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-[#0A0A0A] text-[#F5F5F5] selection:bg-primary/20 selection:text-foreground;
+    background-color: #0A0A0A;
+    color: #F5F5F5;
+  }
+}
+
+/* Custom scrollbar for SOC aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+::-webkit-scrollbar-thumb {
+  background: #2F2F2F;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A1A1AA;
+}

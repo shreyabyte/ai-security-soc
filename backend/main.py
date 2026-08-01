@@ -7,6 +7,7 @@ import models
 import schemas
 import detection
 import log_generator
+import ai_analyst
 from database import engine, SessionLocal
 
 # Create database tables
@@ -104,3 +105,13 @@ def get_servers(db: Session = Depends(get_db)):
         })
 
     return result
+
+
+@app.get("/ai/summary", response_model=schemas.AISummary)
+def ai_summary(db: Session = Depends(get_db)):
+    return ai_analyst.get_summary(db)
+
+
+@app.post("/ai/ask", response_model=schemas.AIAskResponse)
+def ai_ask(payload: schemas.AIAskRequest, db: Session = Depends(get_db)):
+    return {"answer": ai_analyst.ask(db, payload.question)}
