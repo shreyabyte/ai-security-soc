@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import List, Optional
 
 class LogCreate(BaseModel):
     server_id: str
@@ -23,3 +24,19 @@ class AlertOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class AISummary(BaseModel):
+    current_focus: str
+    risk_score: int
+    risk_label: str
+    recommended_actions: List[str]
+    related_alert_id: Optional[int] = None
+
+
+class AIAskRequest(BaseModel):
+    question: str
+
+
+class AIAskResponse(BaseModel):
+    answer: str
