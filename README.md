@@ -37,6 +37,10 @@ Built alert generation, server monitoring, and backend testing
 
 ## Demo
 
+Live working Link:
+Frontend URL: https://ai-security-soc-nu.vercel.app/
+Backend URL: https://ai-security-soc.onrender.com
+
 ## How to run it
 
 **1. Backend** (needs Python 3.10+):
