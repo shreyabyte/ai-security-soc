@@ -1,18 +1,36 @@
 """
-Rule-based "AI Analyst" logic.
+AI Analyst logic.
 
-This is NOT a call to an external LLM (no Gemini/OpenAI key required) — it's
-deterministic analysis over the real logs/alerts already sitting in the
-database. It replaces the frontend's old hardcoded/simulated responses with
-answers grounded in live data. If you later add a Gemini API key, this module
-is the natural place to swap in a real model call (see ask() below).
+Primary path: calls Gemini, grounded in real logs/alerts pulled from the
+database (see _gather_context()). Gemini is instructed to answer ONLY from
+that data, so responses stay factual instead of hallucinated.
+
+Fallback path: if the Gemini call fails (no API key set, network issue,
+rate limit, timeout), we fall back to the original deterministic
+keyword-based logic (_ask_rule_based) so the demo never breaks.
 """
 
+import os
 from datetime import datetime, timedelta
+
+from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 import models
+
+load_dotenv()
+
+# --- Gemini setup -----------------------------------------------------------
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+_gemini_model = None
+
+if GEMINI_API_KEY:
+    import google.generativeai as genai
+
+    genai.configure(api_key=GEMINI_API_KEY)
+    _gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+
 
 RULE_INFO = {
     "Repeated failed logins": {
@@ -99,11 +117,12 @@ def get_summary(db: Session) -> dict:
     }
 
 
-def ask(db: Session, question: str) -> str:
+# --- Rule-based logic (kept as fallback) ------------------------------------
+
+def _ask_rule_based(db: Session, question: str) -> str:
     """
-    Answers a free-text question using real data. Simple keyword routing —
-    swap this function's body for a real LLM call (e.g. Gemini) later if
-    you add an API key; keep the same signature so nothing else has to change.
+    Original deterministic keyword-routing logic. Used as a fallback if the
+    Gemini call fails, and can also be called directly for testing.
     """
     q = question.lower()
 
@@ -158,3 +177,78 @@ def ask(db: Session, question: str) -> str:
             else "No active alerts at the moment."
         )
     )
+
+
+# --- Gemini-backed logic (primary) ------------------------------------------
+
+def _gather_context(db: Session) -> str:
+    """
+    Pulls real, current data from the database and formats it as plain text
+    for Gemini to read. This is what keeps answers grounded in real data
+    instead of the model guessing or making things up.
+    """
+    recent_alerts = (
+        db.query(models.Alert).order_by(desc(models.Alert.timestamp)).limit(10).all()
+    )
+    recent_logs = (
+        db.query(models.Log).order_by(desc(models.Log.timestamp)).limit(20).all()
+    )
+    alert_count = db.query(models.Alert).count()
+    critical_count = db.query(models.Alert).filter(models.Alert.severity == "critical").count()
+
+    alert_lines = "\n".join(
+        f"- [{a.timestamp.strftime('%H:%M:%S')} UTC] {a.rule_triggered} on {a.server_id} "
+        f"(severity: {a.severity})"
+        for a in recent_alerts
+    ) or "No alerts recorded."
+
+    log_lines = "\n".join(
+        f"- [{l.timestamp.strftime('%H:%M:%S')} UTC] {l.event_type} on {l.server_id} "
+        f"({l.severity}): {l.details}"
+        for l in recent_logs
+    ) or "No log activity recorded."
+
+    return f"""SUMMARY: {alert_count} total alert(s), {critical_count} critical.
+
+RECENT ALERTS (most recent first):
+{alert_lines}
+
+RECENT LOG ACTIVITY (most recent first):
+{log_lines}"""
+
+
+def ask(db: Session, question: str) -> str:
+    """
+    Answers a free-text question using real data.
+
+    Primary path: Gemini, grounded in _gather_context(). Falls back to the
+    original rule-based logic if no API key is set or the call fails for
+    any reason (network issue, rate limit, timeout) — so the demo never
+    breaks on a bad connection.
+    """
+    if not _gemini_model:
+        return _ask_rule_based(db, question)
+
+    context = _gather_context(db)
+
+    prompt = f"""You are a security analyst assistant for a SOC (Security Operations Center) dashboard.
+Answer the user's question using ONLY the data provided below. Do not invent
+alerts, logs, servers, or numbers that are not present in the data.
+If the data doesn't contain enough information to answer, say so honestly.
+
+DATA:
+{context}
+
+QUESTION:
+{question}
+
+Give a clear, concise answer in plain English (2-4 sentences), referencing
+specific values from the data (server names, timestamps, severities) where
+relevant."""
+
+    try:
+        response = _gemini_model.generate_content(prompt)
+        text = (response.text or "").strip()
+        return text if text else _ask_rule_based(db, question)
+    except Exception:
+        return _ask_rule_based(db, question)
