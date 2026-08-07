@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -17,14 +18,18 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="AI SOC Backend")
 
 
+ENABLE_LOG_GENERATOR = os.getenv("ENABLE_LOG_GENERATOR", "false").lower() in ("1", "true", "yes")
+
 @app.on_event("startup")
 def start_log_generator():
-    log_generator.start_background_generator()
+    if ENABLE_LOG_GENERATOR:
+        log_generator.start_background_generator()
 
 
 @app.on_event("shutdown")
 def stop_log_generator():
-    log_generator.stop_background_generator()
+    if ENABLE_LOG_GENERATOR:
+        log_generator.stop_background_generator()
 
 # Enable CORS
 app.add_middleware(
