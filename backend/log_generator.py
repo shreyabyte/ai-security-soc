@@ -1,4 +1,3 @@
-import random
 import threading
 import time
 from typing import Optional
@@ -7,46 +6,37 @@ from database import SessionLocal
 import detection
 import models
 
-SERVERS = ["server-1", "server-2", "server-3"]
+import csv
+from pathlib import Path
 
-EVENT_TYPES = [
-    ("login_success", "info"),
-    ("login_failed", "warning"),
-    ("cpu_usage", "info"),
-    ("file_access", "info"),
-]
-
-USERS = ["alice", "bob", "admin", "root", "guest"]
-IPS = ["192.168.1.10", "203.0.113.5", "10.0.0.4", "172.16.0.9"]
 
 _generator_thread: Optional[threading.Thread] = None
 _generator_started = False
 _stop_event = threading.Event()
 
+BASE_DIR = Path(__file__).resolve().parent
+CSV_FILE = BASE_DIR / "data" / "auth_logs.csv"
+
+with open(CSV_FILE, newline="", encoding="utf-8") as f:
+    LOGS = list(csv.DictReader(f))
+
+if not LOGS:
+    raise ValueError("auth_logs.csv is empty")
+
+current_index = 0
 
 def generate_log():
-    server_id = random.choice(SERVERS)
-    event_type, severity = random.choice(EVENT_TYPES)
+    global current_index
 
-    if event_type == "cpu_usage":
-        cpu = random.randint(10, 100)
-        details = f"cpu={cpu}%"
-        if cpu > 85:
-            severity = "critical"
-        elif cpu > 60:
-            severity = "warning"
-    elif event_type in ("login_success", "login_failed"):
-        user = random.choice(USERS)
-        ip = random.choice(IPS)
-        details = f"user={user} ip={ip}"
-    else:
-        details = f"file=/etc/passwd user={random.choice(USERS)}"
+    log = LOGS[current_index]
+
+    current_index = (current_index + 1) % len(LOGS)
 
     return {
-        "server_id": server_id,
-        "event_type": event_type,
-        "details": details,
-        "severity": severity,
+        "server_id": log["server_id"],
+        "event_type": log["event_type"],
+        "details": log["details"],
+        "severity": log["severity"],
     }
 
 
